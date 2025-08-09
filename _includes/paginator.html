@@ -32,6 +32,7 @@
           {%- endif -%}
         {%- endif -%}
 
+<!-- pre page -->
         {%- if paginator.previous_page -%}
           {%- include snippets/prepend-baseurl.html path=paginator.previous_page_path -%}
           {%- assign _href = __return -%}
@@ -44,6 +45,7 @@
           </div></li>
         {%- endif -%}
 
+<!-- for page -->
         {%- for page in (1.._length) -%}
           {%- if page == _cur -%}
             <li>
@@ -81,6 +83,7 @@
           {%- endif -%}
         {%- endfor -%}
 
+<!-- next page -->
         {%- if paginator.next_page -%}
           {%- include snippets/prepend-baseurl.html path=paginator.next_page_path -%}
           {%- assign _href = __return -%}
@@ -94,5 +97,45 @@
         {%- endif -%}
       </ul>
     </div>
+
+<!-- jump page -->
+    <p>
+      <form onsubmit="event.preventDefault();
+        const pageNum = parseInt(document.getElementById('page-input').value);
+        const totalPages = parseInt('{{ paginator.total_pages }}');
+        const currentPage = parseInt('{{ paginator.page }}');
+
+        if (isNaN(pageNum)) {
+          pageNum = {{ paginator.page }};
+          input.value = pageNum;
+        }
+
+        let targetUrl;
+        if (pageNum === currentPage) {
+          return;
+        } else if (pageNum === 1) {
+          {%- assign _home_path = site.paths.home | default: site.data.variables.default.paths.home -%}
+          {%- include snippets/prepend-baseurl.html path=_home_path -%}
+          targetUrl = '{{ __return }}';
+        } else {
+          {%- include snippets/prepend-baseurl.html path=site.paginate_path -%}
+          targetUrl = '{{ __return | replace: ':num', 'PLACEHOLDER' }}'.replace('PLACEHOLDER', pageNum);
+        }
+
+        location.href = targetUrl;">
+        <!-- Page: -->
+        {%- include snippets/get-locale-string.html key='PAGE' -%}
+        {%- assign _locale_page = __return -%}
+        <label for="page-input">{{ _locale_page }}: </label>
+        <!-- input -->
+        <input type="number" id="page-input" min="1" max="{{ paginator.total_pages }}" placeholder="{{ paginator.page }}">
+        <!-- Jump -->
+        {%- include snippets/get-locale-string.html key='JUMP' -%}
+        {%- assign _locale_jump = __return -%}
+        <button type="submit">{{ _locale_jump }}</button>
+
+      </form>
+    <p/>
+
   </div>
 {%- endif -%}
